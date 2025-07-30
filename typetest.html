@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Typing Game</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="wrapper">
+        <input type="text" class="input-field">
+        <div class="content-box">
+            <div class="typing-text">
+                <p id="paragraph"></p>
+            </div>
+            <div class="content">
+                <ul class="result-details">
+                    <li class="time"><p>Time Left:</p><span><b>60</b>s</span></li>
+                    <li class="mistake"><p>Mistakes:</p><span>0</span></li>
+                    <li class="typed"><p>Typed Characters:</p><span>0</span></li>
+                    <li class="backspace-count"><p>Backspace Used:</p><span>0</span></li>
+                    <li class="wpm"><p>WPM:</p><span>0</span></li>
+                    <li class="cpm"><p>CPM:</p><span>0</span></li>
+                    <li class="total-time"><p>Total Time Taken:</p><span>0s</span></li>
+                </ul>
+                <button>Try Again</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: linear-gradient(#007acc, #6DD5FA, #FFFFFF);
+    }
+    .wrapper {
+        width: 700px;
+        padding: 35px;
+        background: #9a8787;
+        border-radius: 10px;
+        box-shadow: 0 10px 15px rgba(175, 167, 167, 0.05);
+    }
+    .typing-text p {
+        font-size: 21px;
+        text-align: justify;
+    }
+    .typing-text p span {
+        color: white;
+    }
+    .typing-text p span.incorrect {
+        color: red;
+    }
+    .typing-text p span.correct {
+        color: green;
+    }
+</style>
+
+<script>
+    let timer, maxTime = 60, timeLeft = maxTime, charIndex = 0, mistakes = 0, backspaceCount = 0, isTyping = false, startTime;
+
+    function initTimer() {
+        if (timeLeft > 0) {
+            timeLeft--;
+            timeTag.innerText = timeLeft;
+        } else {
+            clearInterval(timer);
+        }
+    }
+    
+    const paragraphs = [
+        "Authors often misinterpret the lettuce as a folklore rabbi, when in actuality it feels more like an uncursed bacon...",
+        "In modern times the first scrawny kitten is, in its own way, an input...",
+        "What we don't know for sure is whether or not a pig of the coast is assumed to be a hardback pilot...",
+        "An aunt is a bassoon from the right perspective...",
+        "A baby is a shingle from the right perspective...",
+        "A broadband jam is a network of the mind...",
+        "In recent years, some teeming herons are thought of simply as numbers...",
+        "A cough is a talk from the right perspective...",
+        "Authors often misinterpret the flag as a wayless trigonometry...",
+        "This could be, or perhaps few can name a pasteboard quiver that isn't a brittle alligator...",
+        "The vision of an attempt becomes a lawny output...",
+        "A tramp is a siamese from the right perspective...",
+        "The frosts could be said to resemble backstage chards...",
+        "Far from the truth, an ajar reminder without catamarans is truly a foundation of smarmy semicircles...",
+        "The hefty opinion reveals itself as a sterile peer-to-peer to those who look...",
+        "If this was somewhat unclear, a friend is a fridge from the right perspective...",
+        "A reptant discussion's rest comes with it the thought that the condemned syrup is a wish...",
+        "Those cowbells are nothing more than elements..."
+    ];
+    
+    const typingText = document.querySelector(".typing-text p");
+    const inpField = document.querySelector(".wrapper .input-field");
+    const tryAgainBtn = document.querySelector(".content button");
+    const timeTag = document.querySelector(".time span b");
+    const mistakeTag = document.querySelector(".mistake span");
+    const typedTag = document.querySelector(".typed span");
+    const backspaceTag = document.querySelector(".backspace-count span");
+    const wpmTag = document.querySelector(".wpm span");
+    const cpmTag = document.querySelector(".cpm span");
+    const totalTimeTag = document.querySelector(".total-time span");
+    
+    function loadParagraph() {
+        clearInterval(timer);
+        isTyping = false;
+        timeLeft = maxTime;
+        charIndex = 0;
+        mistakes = 0;
+        backspaceCount = 0;
+        timeTag.innerText = timeLeft;
+        mistakeTag.innerText = mistakes;
+        typedTag.innerText = 0;
+        backspaceTag.innerText = 0;
+        wpmTag.innerText = 0;
+        cpmTag.innerText = 0;
+        totalTimeTag.innerText = "0s";
+        inpField.value = "";
+        startTime = null;
+
+        const randomIndex = Math.floor(Math.random() * paragraphs.length);
+        typingText.innerHTML = "";
+        
+        paragraphs[randomIndex].split("").forEach(char => {
+            let span = `<span>${char}</span>`;
+            typingText.innerHTML += span;
+        });
+        
+        typingText.querySelector("span").classList.add("active");
+    }
+    
+    function initTyping(event) {
+        let characters = typingText.querySelectorAll("span");
+        let typedChar = inpField.value.split("")[charIndex];
+        
+        if (!startTime) startTime = Date.now();
+        
+        if (charIndex < characters.length - 1 && timeLeft > 0) {
+            if (!isTyping) {
+                timer = setInterval(initTimer, 1000);
+                isTyping = true;
+            }
+            
+            if (event.inputType === "deleteContentBackward") {
+                if (charIndex > 0) {
+                    charIndex--;
+                    backspaceCount++;
+                    backspaceTag.innerText = backspaceCount;
+                    characters[charIndex].classList.remove("correct", "incorrect", "active");
+                    characters[charIndex].classList.add("active");
+                }
+            } else {
+                if (characters[charIndex].textContent === typedChar) {
+                    characters[charIndex].classList.add("correct");
+                } else {
+                    mistakes++;
+                    characters[charIndex].classList.add("incorrect");
+                }
+                characters[charIndex].classList.remove("active");
+                charIndex++;
+                if (charIndex < characters.length) characters[charIndex].classList.add("active");
+            }
+            
+            let wpm = Math.round(((charIndex - mistakes) / 5) / ((maxTime - timeLeft) / 60));
+            wpmTag.innerText = wpm < 0 || !wpm || wpm === Infinity ? 0 : wpm;
+            mistakeTag.innerText = mistakes;
+            typedTag.innerText = charIndex;
+            cpmTag.innerText = charIndex - mistakes;
+        } else {
+            clearInterval(timer);
+            inpField.value = "";
+            if (startTime) {
+                let totalTime = Math.floor((Date.now() - startTime) / 1000);
+                totalTimeTag.innerText = `${totalTime}s`;
+            }
+        }
+    }
+    
+    loadParagraph();
+    inpField.addEventListener("input", initTyping);
+    tryAgainBtn.addEventListener("click", loadParagraph);
+</script>
