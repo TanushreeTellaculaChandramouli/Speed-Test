@@ -22,5 +22,7 @@ A fun and interactive web application built with **HTML, CSS, and JavaScript** t
 ## 📁 Folder Structure
 
 ├── index.html
+
 ├── style.css
+
 └── script.js
